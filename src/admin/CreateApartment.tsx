@@ -1,206 +1,180 @@
-import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { addApartment } from "../slice/apartmentSlice"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { addApartment } from "../slice/apartmentSlice";
 
+// ------------------ ZOD SCHEMA ------------------
+const apartmentSchema = z.object({
+  title: z.string().min(2, "Apartment Name is required"),
+
+  bhkPrices: z.object({
+    "1 BHK": z.string().nonempty("1 BHK price is required"),
+  }),
+
+  city: z.string().min(2, "City is required"),
+  town: z.string().min(2, "Town is required"),
+
+  noOfFlats: z.string().optional(),
+  description: z.string().optional(),
+
+  ownerName: z.string().min(2, "Owner name is required"),
+  ownerMobile: z.string().min(10, "Invalid mobile number"),
+  ownerEmail: z.string().email("Invalid email"),
+
+  mainImage: z
+    .any()
+    .refine((file) => file?.length > 0, "Main image is required"),
+});
+
+// ------------------ COMPONENT ------------------
 const CreateApartment = () => {
   const dispatch = useDispatch();
 
-  const [apartment, setApartment] = useState({
-    name: "",
-    flattype: "",
-    bhkPrices: {  "2 BHK": "", "3 BHK": "" },
-    city: "",
-    town: "",
-    village: "",
-    units: "",
-    blocks: "",
-    floors: "",
-    mainImage: null,
-    subImages: [],
-    about: "",
-    ownerName: "",
-    ownerMobile: "",
-    ownerEmail: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-
-    if (name === "mainImage") {
-      setApartment({ ...apartment, mainImage: files[0] });
-    } else if (name === "subImages") {
-      setApartment({ ...apartment, subImages: Array.from(files) });
-    } else {
-      setApartment({ ...apartment, [name]: value });
-    }
-  };
-
-  const handleBhkPriceChange = (bhk, value) => {
-    setApartment({
-      ...apartment,
-      bhkPrices: { ...apartment.bhkPrices, [bhk]: value },
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // 🔥 Redux store-க்கு data add பண்ண்றது
-    dispatch(addApartment(apartment));
-
-    alert("Apartment Created Successfully!");
-
-    // Reset form
-    setApartment({
-      name: "",
-       flattype: "",
-      bhkPrices: {  "2 BHK": "", "3 BHK": "" },
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(apartmentSchema),
+    defaultValues: {
+      title: "",
+      bhkPrices: { "1 BHK": "" },
       city: "",
       town: "",
-      village: "",
-      units: "",
-      blocks: "",
-      floors: "",
-      mainImage: null,
-      subImages: [],
-      about: "",
+      noOfFlats: "",
+      description: "",
       ownerName: "",
       ownerMobile: "",
       ownerEmail: "",
-    });
+      mainImage: null,
+    },
+  });
+
+  const onSubmit = (data) => {
+    const apartmentData = {
+      ...data,
+      mainImage: data.mainImage[0], // File convert
+    };
+
+    dispatch(addApartment(apartmentData));
+    alert("Apartment Created Successfully!");
+    reset();
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl">
+    <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto mt-10">
       <h2 className="text-2xl font-bold mb-4">Create New Apartment</h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {/* Apartment Name */}
         <input
           type="text"
-          name="name"
           placeholder="Apartment Name"
-          value={apartment.name}
-          onChange={handleChange}
+          {...register("title")}
           className="border px-4 py-2 rounded"
-          required
         />
-          <input
-          type="text"
-          name="flattype"
-          placeholder="Flat Type"
-          value={apartment.flattype}
-          onChange={handleChange}
-          className="border px-4 py-2 rounded"
-          required
-        />
+        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
 
-        <div className="flex gap-2">
-          {["2 BHK", "3 BHK"].map((bhk) => (
-            <input
-              key={bhk}
-              type="number"
-              placeholder={`${bhk} Price`}
-              value={apartment.bhkPrices[bhk]}
-              onChange={(e) => handleBhkPriceChange(bhk, e.target.value)}
-              className="border px-4 py-2 rounded flex-1"
-              required
-            />
-          ))}
+        {/* 1 BHK Price */}
+        <div>
+          <input
+            type="text"
+            placeholder="1 BHK Price"
+            {...register("bhkPrices.1 BHK")}
+            className="border px-4 py-2 rounded w-full"
+          />
+          {errors.bhkPrices?.["1 BHK"] && (
+            <p className="text-red-500">
+              {errors.bhkPrices["1 BHK"].message}
+            </p>
+          )}
         </div>
 
+        {/* City & Town */}
         <div className="flex gap-2">
           <input
             type="text"
-            name="city"
             placeholder="City"
-            value={apartment.city}
-            onChange={handleChange}
+            {...register("city")}
             className="border px-4 py-2 rounded flex-1"
-            required
           />
+
           <input
             type="text"
-            name="town"
             placeholder="Town"
-            value={apartment.town}
-            onChange={handleChange}
-            className="border px-4 py-2 rounded flex-1"
-            required
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="number"
-            name="units"
-            placeholder="Units"
-            value={apartment.units}
-            onChange={handleChange}
-            className="border px-4 py-2 rounded flex-1"
-          />
-          <input
-            type="number"
-            name="blocks"
-            placeholder="Blocks"
-            value={apartment.blocks}
-            onChange={handleChange}
-            className="border px-4 py-2 rounded flex-1"
-          />
-          <input
-            type="number"
-            name="floors"
-            placeholder="Floors"
-            value={apartment.floors}
-            onChange={handleChange}
+            {...register("town")}
             className="border px-4 py-2 rounded flex-1"
           />
         </div>
+        {errors.city && (
+          <p className="text-red-500">{errors.city.message}</p>
+        )}
+        {errors.town && (
+          <p className="text-red-500">{errors.town.message}</p>
+        )}
 
+        {/* No of Flats */}
+        <input
+          type="number"
+          placeholder="No of Flats"
+          {...register("noOfFlats")}
+          className="border px-4 py-2 rounded w-full"
+        />
+
+        {/* Main Image */}
         <div className="flex flex-col gap-2">
           <label>Main Image:</label>
-          <input type="file" name="mainImage" accept="image/*" onChange={handleChange} />
-
-          <label>Sub Images:</label>
-          <input type="file" name="subImages" accept="image/*" multiple onChange={handleChange} />
+          <input type="file" {...register("mainImage")} />
+          {errors.mainImage && (
+            <p className="text-red-500">{errors.mainImage.message}</p>
+          )}
         </div>
 
+        {/* Description */}
         <textarea
-          name="about"
-          placeholder="About Apartment"
-          value={apartment.about}
-          onChange={handleChange}
+          placeholder="Description"
+          {...register("description")}
           className="border px-4 py-2 rounded"
           rows={3}
         />
 
+        {/* Owner Details */}
         <div className="flex gap-2">
           <input
             type="text"
-            name="ownerName"
             placeholder="Owner Name"
-            value={apartment.ownerName}
-            onChange={handleChange}
+            {...register("ownerName")}
             className="border px-4 py-2 rounded flex-1"
           />
+
           <input
             type="text"
-            name="ownerMobile"
             placeholder="Owner Mobile"
-            value={apartment.ownerMobile}
-            onChange={handleChange}
+            {...register("ownerMobile")}
             className="border px-4 py-2 rounded flex-1"
           />
+
           <input
             type="email"
-            name="ownerEmail"
             placeholder="Owner Email"
-            value={apartment.ownerEmail}
-            onChange={handleChange}
+            {...register("ownerEmail")}
             className="border px-4 py-2 rounded flex-1"
           />
         </div>
 
+        {errors.ownerName && (
+          <p className="text-red-500">{errors.ownerName.message}</p>
+        )}
+        {errors.ownerMobile && (
+          <p className="text-red-500">{errors.ownerMobile.message}</p>
+        )}
+        {errors.ownerEmail && (
+          <p className="text-red-500">{errors.ownerEmail.message}</p>
+        )}
+
+        {/* Submit Button */}
         <div className="flex justify-end mt-4">
           <button
             type="submit"
@@ -209,7 +183,6 @@ const CreateApartment = () => {
             Add Apartment
           </button>
         </div>
-
       </form>
     </div>
   );

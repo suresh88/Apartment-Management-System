@@ -8,11 +8,13 @@ import SearchFilter from "./components/SearchFilter";
 import Footer from "./components/Footer";
 
 import AdminPage from "./admin/AdminPage";
-import ApartmentList from "./components/ApartmentList";
-/* import BookingStatus from "./components/BookingStatus"; */
+
+ import BookingStatus from "./admin/BookingStatus";
 import CreateApartment from "./admin/CreateApartment";
 import Login from "./components/Login";
 import UserPage from "./components/UserPage";
+import AdminApartmentList from "./admin/AdminApartmentList";
+import Appartment from "./components/Apartment";
 
 function App() {
   return (
@@ -25,15 +27,16 @@ function App() {
         <Route path="/info" element={<Info />} />
         <Route path="/footer" element={<Footer />} />
           <Route path="/login" element={<Login/>} />
-               <Route path="/user" element={<UserPage/>} />
+               <Route path="/userpage" element={<UserPage/>} />
 
         {/* Admin Nested Routes */}
         <Route path="/admin" element={<AdminPage />}>
           <Route index element={<div className="p-4">Select an option</div>} />
-       {/*    <Route path="apartment-list" element={<ApartmentList />} /> */}
-          {/* <Route path="booking-status" element={<BookingStatus />} /> */}
-          <Route path="create-apartment" element={<CreateApartment />} />
+           <Route path="adminapartmentlist" element={<AdminApartmentList/>} /> 
+          <Route path="bookingstatus" element={<BookingStatus/>} /> 
+          <Route path="createapartment" element={<CreateApartment />} />
         </Route>
+         <Route path="apartment" element={<Appartment/>} />
       </Routes>
     </BrowserRouter>
   );

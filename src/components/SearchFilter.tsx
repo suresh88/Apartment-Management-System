@@ -1,15 +1,28 @@
 import { useState } from "react";
 
- function SearchFilter () {
+function SearchFilter() {
   const [location, setLocation] = useState("");
-  const [price, setPrice] = useState([0, 3000000]); // range
-  const [bhk, setBhk] = useState("");
+  const [selectedBHK, setSelectedBHK] = useState<string[]>([]); // array of selected BHKs
+  const [priceRange, setPriceRange] = useState({ low: "", high: "" });
 
   const handleSearch = () => {
-    console.log({ location, price, bhk });
+    console.log({
+      location,
+      bhk: selectedBHK.length > 0 ? selectedBHK : "Any",
+      priceLow: priceRange.low,
+      priceHigh: priceRange.high,
+    });
   };
 
-  const bhkOptions = ["1", "2", "3", "4"];
+  const bhkOptions = ["2", "3"]; // Only 2 & 3 BHK
+
+  const toggleBHK = (bhk: string) => {
+    if (selectedBHK.includes(bhk)) {
+      setSelectedBHK(selectedBHK.filter((b) => b !== bhk)); // deselect
+    } else {
+      setSelectedBHK([...selectedBHK, bhk]); // select
+    }
+  };
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-xl max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center">
@@ -22,38 +35,49 @@ import { useState } from "react";
         className="flex-1 p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
 
-      {/* Price Range */}
-      <div className="flex flex-col">
-        <label className="text-sm text-gray-600">Price (₹)</label>
-        <input
-          type="range"
-          min="0"
-          max="3000000"
-          step="100000"
-          value={price[1]}
-          onChange={(e) => setPrice([0, Number(e.target.value)])}
-          className="w-48"
-        />
-        <span className="text-sm text-gray-500">
-          ₹{price[0].toLocaleString()} - ₹{price[1].toLocaleString()}
-        </span>
-      </div>
-
       {/* BHK Buttons */}
       <div className="flex gap-2">
         {bhkOptions.map((option) => (
           <button
             key={option}
-            onClick={() => setBhk(option)}
-            className={`px-4 py-2 rounded-2xl border ${
-              bhk === option
+            onClick={() => toggleBHK(option)}
+            className={`px-4 py-2 rounded-2xl border flex items-center justify-center ${
+              selectedBHK.includes(option)
                 ? "bg-blue-500 text-white border-blue-500"
                 : "bg-white text-gray-700 border-gray-300"
             } hover:bg-blue-500 hover:text-white transition`}
           >
+            <input
+              type="checkbox"
+              checked={selectedBHK.includes(option)}
+              readOnly
+              className="mr-2"
+            />
             {option} BHK
           </button>
         ))}
+      </div>
+
+      {/* Price Inputs */}
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="Low Price"
+          value={priceRange.low}
+          onChange={(e) =>
+            setPriceRange({ ...priceRange, low: e.target.value })
+          }
+          className="border p-2 rounded w-24"
+        />
+        <input
+          type="number"
+          placeholder="High Price"
+          value={priceRange.high}
+          onChange={(e) =>
+            setPriceRange({ ...priceRange, high: e.target.value })
+          }
+          className="border p-2 rounded w-24"
+        />
       </div>
 
       {/* Search Button */}
@@ -66,4 +90,5 @@ import { useState } from "react";
     </div>
   );
 }
-export default SearchFilter
+
+export default SearchFilter;

@@ -21,6 +21,7 @@ const Navbar = () => {
         <div className="hidden md:flex space-x-8 text-lg">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/about">About</NavLink>
+          <NavLink to="/Apartment">Apartment</NavLink>
           <NavLink to="/contact">Contact</NavLink>
 
           {currentUser?.role === "admin" && (
@@ -43,7 +44,7 @@ const Navbar = () => {
                 alt="profile"
               />
               <div className="absolute right-0 mt-2 bg-white text-black rounded shadow-lg p-2 flex flex-col gap-2">
-                <NavLink to="/profile">Profile</NavLink>
+                <NavLink to="/userpage">Profile</NavLink>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             </div>

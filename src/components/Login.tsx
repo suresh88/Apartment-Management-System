@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login, signup, initializeAdmin } from "../slice/authSlice";
+import { initializeAdmin, login, logout, signup } from "../slice/authSlice";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -144,3 +145,4 @@ const Login = () => {
 };
 
 export default Login;
+
