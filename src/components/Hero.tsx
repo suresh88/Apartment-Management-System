@@ -3,7 +3,7 @@ import hero1 from "../assets/hero-img-1.jpg";
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative h-screen w-full">
+    <section className="relative h-[90vh] md:h-screen w-full overflow-hidden">
 
       {/* Background Image */}
       <div
@@ -24,9 +24,10 @@ const Hero: React.FC = () => {
           Search and discover the perfect home that fits your lifestyle.
         </p>
 
-        <button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg transition">
-          Get Started
-        </button>
+      <button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg transition"
+>
+  Get Started
+</button>
       </div>
     </section>
   );

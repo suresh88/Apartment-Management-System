@@ -1,55 +1,75 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import type { Apartment } from "../type/Apartment";
 
-const ApartmentCard = ({ apartment, onView }) => {
-  // Convert File to URL
-  const imageUrl =
-    apartment.mainImage instanceof File
-      ? URL.createObjectURL(apartment.mainImage)
-      : apartment.image;
+interface ApartmentCardProps {
+  apartment: Apartment;
+  onView: (apartment: Apartment) => void;
+}
+
+const ApartmentCard: React.FC<ApartmentCardProps> = ({ apartment, onView }) => {
+  //image preview
+  const [preview, setPreview] = useState("");
+// 2 type image upload 
+  useEffect(() => {
+    if (!apartment.image) return;
+
+    // File (local upload)
+    if (apartment.image instanceof File) {
+      const url = URL.createObjectURL(apartment.image);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+
+
+    if (typeof apartment.image === "string") {
+      setPreview(
+        apartment.image.replace(
+          "http://localhost:5000",
+          "https://retinal-lark-phony.ngrok-free.dev"
+        )
+      );
+    }
+  }, [apartment.image]);
+
+  //card show city and area same line
+
+  const fullLocation = [apartment.city, apartment.area].filter(Boolean).join(", ");
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden w-full max-w-sm border">
-      {/* IMAGE */}
-      <img
-        src={imageUrl}
-        alt={apartment.title}
-        className="h-56 w-full object-cover"
-      />
-
-      {/* CONTENT SECTION */}
-      <div className="p-5">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">{apartment.name || apartment.title}</h2>
+    <div className="bg-white border rounded-lg overflow-hidden w-full max-w-xs mx-auto shadow-md">
+      
+      {/* Image*/}
+      {preview ? (
+        <img
+          src={preview}
+          alt={apartment.title}
+          className="h-44 w-full object-cover"
+        />
+      ) : (
+        <div className="h-44 w-full bg-gray-200 flex items-center justify-center">
+          No Image
         </div>
+      )}
 
-        {/* LOCATION */}
-        <p className="flex gap-2 text-gray-600 mt-1">
-          {apartment.location ||
-            `${apartment.city ? apartment.city + "," : ""} ${apartment.town}`}
-        </p>
+      {/* Content */}
+      <div className="p-4">
+        <h2 className="text-lg font-semibold">{apartment.title}</h2>
+        <p className="text-gray-600 text-sm mt-1">{fullLocation}</p>
 
-        {/* LINE */}
-        <div className="w-full h-px bg-gray-200 my-4"></div>
-
-        {/* DETAILS */}
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-xs mt-3">
           <div>
-            <p className="text-gray-400">TOTAL UNITS</p>
-            <p className="font-semibold">{apartment.units}</p>
+            <p className="text-gray-400">Flats</p>
+            <p className="font-semibold">{apartment.noOfFlats}</p>
           </div>
-
           <div>
-            <p className="text-gray-400">BEDROOMS</p>
-            <p className="font-semibold">
-              {apartment.bhk || Object.keys(apartment.bhkPrices).join(", ")}
-            </p>
+            <p className="text-gray-400">Price</p>
+            <p className="font-semibold">₹ {apartment.price}</p>
           </div>
         </div>
 
-        {/* VIEW BUTTON */}
         <button
           onClick={() => onView(apartment)}
-          className="mt-4 w-full text-black font-semibold py-2 rounded-md"
+          className="mt-3 w-full py-2 text-sm bg-blue-600 text-white rounded-md"
         >
           VIEW
         </button>

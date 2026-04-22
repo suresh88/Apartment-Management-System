@@ -1,21 +1,22 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState } from "react";
 import ViewPopup from "./ViewPopup";
+import type { Apartment } from "../type/Apartment";
 
 const AdminPage = () => {
-  const [selectedApartment, setSelectedApartment] = useState(null);
+  const [selectedApartment, setSelectedApartment] = useState < Apartment | null> (null);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">Admin Dashboard</h1>
 
       {/* Buttons */}
-      <div className="flex gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:flex gap-3 sm:gap-4 mb-6">
         <NavLink
           to="adminapartmentlist"
           className={({ isActive }) =>
-            `px-4 py-2 rounded ${
-              isActive ? "bg-blue-500 text-white" : "bg-gray-300"
+            `text-center px-4 py-2 rounded-lg transition ${
+              isActive ? "bg-blue-600 text-white shadow-md" : "bg-gray-300 hover:bg-gray-400"
             }`
           }
         >
@@ -25,8 +26,8 @@ const AdminPage = () => {
         <NavLink
           to="bookingstatus"
           className={({ isActive }) =>
-            `px-4 py-2 rounded ${
-              isActive ? "bg-blue-500 text-white" : "bg-gray-300"
+            `text-center px-4 py-2 rounded-lg transition  ${
+              isActive ? "bg-blue-600 text-white shadow-md" : "bg-gray-300 hover:bg-gray-400"
             }`
           }
         >
@@ -36,8 +37,8 @@ const AdminPage = () => {
         <NavLink
           to="createapartment"
           className={({ isActive }) =>
-            `px-4 py-2 rounded ${
-              isActive ? "bg-blue-500 text-white" : "bg-gray-300"
+            `text-center px-4 py-2 rounded-lg transition ${
+              isActive ? "bg-blue-600 text-white shadow-md" : "bg-gray-300 hover:bg-gray-400"
             }`
           }
         >
@@ -45,8 +46,11 @@ const AdminPage = () => {
         </NavLink>
       </div>
 
-      {/* Pass setSelectedApartment to nested routes */}
+   
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+
       <Outlet context={{ setSelectedApartment }} />
+       </div>
 
       {/* Popup Show */}
       {selectedApartment && (

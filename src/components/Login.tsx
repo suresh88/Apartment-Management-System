@@ -1,128 +1,154 @@
-
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { initializeAdmin, login, logout, signup } from "../slice/authSlice";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { login } from "../slice/authSlice";
 import { useNavigate } from "react-router-dom";
+import type { AppDispatch } from "../store/store";
+import { API } from "../services/api";
+import axios from "axios";
+import type { FormEvent } from "react";
 
-const Login = () => {
-  const dispatch = useDispatch();
+const Login: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
-  // Redux store users
-  const users = useSelector((state: any) => state.auth.users);
 
   const [showSignup, setShowSignup] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
+  const [signupData, setSignupData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
-  useEffect(() => {
-    dispatch(initializeAdmin()); // Admin auto-create
-  }, [dispatch]);
-
-  // Login function
-  const handleLogin = (e: any) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const foundUser = users.find(
-      (u: any) => u.email === loginData.email && u.password === loginData.password
-    );
+    try {
+      const res = await API.post("/auth/login", loginData);
 
-    if (foundUser) {
-      dispatch(login(foundUser)); // Store in Redux + sessionStorage
-      alert(`Welcome ${foundUser.name}!`);
-      navigate(foundUser.role === "admin" ? "/admin" : "/user");
-    } else {
-      alert("Invalid email or password!");
-    }
+      const user = res.data.data.user; 
+      dispatch(login({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    }));
+     
+      alert(`Welcome ${user.name}`);
+    
+      navigate(user.role === "admin" ? "/admin" : "/");
+    } 
+
+catch (err: unknown) {
+  if (axios.isAxiosError(err)) {
+    alert(err.response?.data?.message || "Login failed");
+  } else {
+    alert("Login failed");
+  }
+}
+
   };
 
-  // Signup function
-  const handleSignup = (e: any) => {
+  // Signup
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const emailExists = users.some((u: any) => u.email === signupData.email);
-    if (emailExists) return alert("Email already registered!");
+    try {
+    await API.post("/auth/register", signupData);
 
-    const newUser = { ...signupData, role: "user" };
-    dispatch(signup(newUser)); // Redux + sessionStorage update
+      alert("Account created!");
 
-    alert("Account created successfully!");
-    setShowSignup(false);
-    setSignupData({ name: "", email: "", password: "" });
+      setShowSignup(false);
+      setSignupData({ name: "", email: "", password: "" });
+    } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      alert(err.response?.data?.message || "Signup failed");
+    } else {
+      alert("Signup failed");
+    }
+  }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-
-      {/* Login Box */}
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      {/* LOGIN */}
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm md:max-w-md 
+                      transition-all duration-300">
+        <h1 className="text-3xl font-bold mb-4 text-center">Welcome to EasyHome</h1>
+        <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">Login</h2>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
             type="email"
             placeholder="Email"
             value={loginData.email}
-            onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-            className="border p-2 rounded"
-            required
+            onChange={(e) =>
+              setLoginData({ ...loginData, email: e.target.value })
+            }
+            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           />
 
           <input
             type="password"
             placeholder="Password"
             value={loginData.password}
-            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            className="border p-2 rounded"
-            required
+            onChange={(e) =>
+              setLoginData({ ...loginData, password: e.target.value })
+            }
+            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           />
 
-          <button className="bg-blue-600 text-white p-2 rounded">Login</button>
+          <button className="bg-blue-600 text-white p-3 rounded-lg 
+                             hover:bg-blue-700 transition-all">Login</button>
         </form>
 
         <p className="text-center mt-4">
           Don't have an account?{" "}
-          <span className="text-blue-600 cursor-pointer" onClick={() => setShowSignup(true)}>
+          <span
+            className="text-blue-600 cursor-pointer font-semibold"
+            onClick={() => setShowSignup(true)}
+          >
             Create New
           </span>
         </p>
       </div>
 
-      {/* Signup Modal */}
+      {/* Signup*/}
       {showSignup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 w-full max-w-md rounded shadow">
-            <h2 className="text-xl font-bold mb-4">Sign Up</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-4">
+          <div className="bg-white p-6 w-full max-w-md rounded-xl shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
 
             <form onSubmit={handleSignup} className="flex flex-col gap-3">
               <input
                 type="text"
                 placeholder="Full Name"
                 value={signupData.name}
-                onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                className="border p-2 rounded"
-                required
+                onChange={(e) =>
+                  setSignupData({ ...signupData, name: e.target.value })
+                }
+                className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
               <input
                 type="email"
                 placeholder="Email"
                 value={signupData.email}
-                onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                className="border p-2 rounded"
-                required
+                onChange={(e) =>
+                  setSignupData({ ...signupData, email: e.target.value })
+                }
+                className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
               <input
                 type="password"
                 placeholder="Password"
                 value={signupData.password}
-                onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                className="border p-2 rounded"
-                required
+                onChange={(e) =>
+                  setSignupData({ ...signupData, password: e.target.value })
+                }
+                className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3 mt-3">
                 <button
                   type="button"
                   className="bg-gray-300 px-3 py-1 rounded"
@@ -131,11 +157,10 @@ const Login = () => {
                   Cancel
                 </button>
 
-                <button className="bg-blue-600 text-white px-4 py-1 rounded">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                   Create
                 </button>
               </div>
-
             </form>
           </div>
         </div>
@@ -145,4 +170,3 @@ const Login = () => {
 };
 
 export default Login;
-

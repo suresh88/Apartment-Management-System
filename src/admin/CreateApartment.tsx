@@ -1,188 +1,227 @@
-import { useDispatch } from "react-redux";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { addApartment } from "../slice/apartmentSlice";
 
+import { z } from "zod";
+import {API} from "../services/api"
+import { useDispatch } from "react-redux";
+import { addApartment } from "../slice/apartmentSlice";
 // ------------------ ZOD SCHEMA ------------------
 const apartmentSchema = z.object({
-  title: z.string().min(2, "Apartment Name is required"),
+  title: z.string().min(2),
 
-  bhkPrices: z.object({
-    "1 BHK": z.string().nonempty("1 BHK price is required"),
-  }),
+  price: z.coerce.number().min(1, "Price is required"),
 
-  city: z.string().min(2, "City is required"),
-  town: z.string().min(2, "Town is required"),
+  city: z.string().min(2),
+  area: z.string().min(2),
 
-  noOfFlats: z.string().optional(),
+  noOfFlats: z.coerce.number().optional(),
   description: z.string().optional(),
 
-  ownerName: z.string().min(2, "Owner name is required"),
-  ownerMobile: z.string().min(10, "Invalid mobile number"),
-  ownerEmail: z.string().email("Invalid email"),
+  ownerName: z.string().min(2),
+  contactNumber: z.string().min(10),
+  email: z.string().email(),
 
-  mainImage: z
-    .any()
-    .refine((file) => file?.length > 0, "Main image is required"),
+  image: z.any().refine((file) => file?.length > 0),
 });
 
-// ------------------ COMPONENT ------------------
-const CreateApartment = () => {
-  const dispatch = useDispatch();
+type ApartmentForm = z.infer<typeof apartmentSchema>;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
+const CreateApartment: React.FC = () => {
+const dispatch = useDispatch();
+
+ const { register, handleSubmit, reset, formState: { errors } } =
+  useForm<ApartmentForm>({
     resolver: zodResolver(apartmentSchema),
     defaultValues: {
       title: "",
-      bhkPrices: { "1 BHK": "" },
+      price: 0,
       city: "",
-      town: "",
-      noOfFlats: "",
+      area: "",
+      noOfFlats: 0,
       description: "",
       ownerName: "",
-      ownerMobile: "",
-      ownerEmail: "",
-      mainImage: null,
+      contactNumber: "",
+      email: "",
     },
   });
 
-  const onSubmit = (data) => {
-    const apartmentData = {
-      ...data,
-      mainImage: data.mainImage[0], // File convert
-    };
 
-    dispatch(addApartment(apartmentData));
+   const onSubmit = async (data: ApartmentForm) => {
+    
+  console.log("FORM DATA:", data);
+
+  try {
+    
+    const formData = new FormData();
+
+    formData.append("title", data.title);
+    formData.append("price", String(data.price));
+    formData.append("city", data.city);
+    formData.append("area", data.area);
+    formData.append("noOfFlats", String(data.noOfFlats ?? ""));
+    formData.append("description", data.description || "");
+    formData.append("ownerName", data.ownerName);
+    formData.append("contactNumber", data.contactNumber);
+    formData.append("email", data.email);
+  formData.append("image", data.image[0]);  
+
+
+
+    const res = await API.post("/apartments/register", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+   
+      },
+        withCredentials: true, 
+    });
+    
+    dispatch(addApartment(res.data.data));
+  
+
     alert("Apartment Created Successfully!");
     reset();
-  };
-
+  } catch (error) {
+    console.log("Error:", error);
+    alert("Failed to create apartment");
+  }
+};
   return (
-    <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-4">Create New Apartment</h2>
+    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-3xl mx-auto mt-10">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800 text-center">Create New Apartment</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         {/* Apartment Name */}
         <input
           type="text"
           placeholder="Apartment Name"
           {...register("title")}
-          className="border px-4 py-2 rounded"
+          className="border px-4 py-2 rounded w-full mt-1"
         />
-        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+        {errors.title && <p className="text-red-500 text-sm">{errors.title?.message}</p>}
 
-        {/* 1 BHK Price */}
+        {/* Price */}
         <div>
-          <input
-            type="text"
-            placeholder="1 BHK Price"
-            {...register("bhkPrices.1 BHK")}
-            className="border px-4 py-2 rounded w-full"
-          />
-          {errors.bhkPrices?.["1 BHK"] && (
-            <p className="text-red-500">
-              {errors.bhkPrices["1 BHK"].message}
-            </p>
-          )}
+       <input
+  type="text"
+  placeholder="Price"
+  {...register("price")}
+  className="border px-4 py-2 rounded w-full mt-1"
+/>
+         {errors.price && (
+  <p className="text-red-500 text-sm">
+    {errors.price?.message}
+  </p>
+)}
+          
         </div>
 
-        {/* City & Town */}
-        <div className="flex gap-2">
+        {/* City & area */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
             type="text"
             placeholder="City"
             {...register("city")}
-            className="border px-4 py-2 rounded flex-1"
+            className="border px-4 py-2 rounded w-full mt-1"
           />
 
           <input
             type="text"
-            placeholder="Town"
-            {...register("town")}
-            className="border px-4 py-2 rounded flex-1"
+            placeholder="area"
+            {...register("area")}
+            className="border px-4 py-2 rounded w-full mt-1"
           />
+            {errors.city && <p className="text-red-500 text-sm">{errors.city.message}</p>}
+        {errors.area && (
+          <p className="text-red-500 text-sm">{errors.area.message}</p>
+        )}
         </div>
-        {errors.city && (
-          <p className="text-red-500">{errors.city.message}</p>
-        )}
-        {errors.town && (
-          <p className="text-red-500">{errors.town.message}</p>
-        )}
-
+      
+       
         {/* No of Flats */}
         <input
           type="number"
           placeholder="No of Flats"
           {...register("noOfFlats")}
-          className="border px-4 py-2 rounded w-full"
+          className="border px-4 py-2 rounded w-full mt-1"
         />
+          {errors.noOfFlats && (
+          <p className="text-red-500 text-sm">{errors.noOfFlats.message}</p>
+        )}
 
         {/* Main Image */}
-        <div className="flex flex-col gap-2">
-          <label>Main Image:</label>
-          <input type="file" {...register("mainImage")} />
-          {errors.mainImage && (
-            <p className="text-red-500">{errors.mainImage.message}</p>
+   <div className="flex flex-col gap-2">
+          <label className="font-medium">Main Image:</label>
+          <input type="file" {...register("image")}  className="mt-2"/>
+          {errors.image && (
+            <p className="text-red-500 text-sm">{errors.image?.message}</p>
           )}
-        </div>
+        </div> 
 
         {/* Description */}
         <textarea
           placeholder="Description"
           {...register("description")}
-          className="border px-4 py-2 rounded"
+          className="border px-4 py-2 rounded w-full mt-1"
           rows={3}
         />
-
-        {/* Owner Details */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Owner Name"
-            {...register("ownerName")}
-            className="border px-4 py-2 rounded flex-1"
-          />
-
-          <input
-            type="text"
-            placeholder="Owner Mobile"
-            {...register("ownerMobile")}
-            className="border px-4 py-2 rounded flex-1"
-          />
-
-          <input
-            type="email"
-            placeholder="Owner Email"
-            {...register("ownerEmail")}
-            className="border px-4 py-2 rounded flex-1"
-          />
-        </div>
-
-        {errors.ownerName && (
-          <p className="text-red-500">{errors.ownerName.message}</p>
+ {errors.description && (
+          <p className="text-red-500 text-sm">{errors.description.message}</p>
         )}
-        {errors.ownerMobile && (
-          <p className="text-red-500">{errors.ownerMobile.message}</p>
-        )}
-        {errors.ownerEmail && (
-          <p className="text-red-500">{errors.ownerEmail.message}</p>
-        )}
+       {/* Owner Details */}
+<div className="flex gap-2 w-full">
 
+  {/* Owner Name */}
+  <div className="flex-1">
+    <input
+      type="text"
+      placeholder="Owner Name"
+      {...register("ownerName")}
+      className="border px-4 py-2 rounded w-full mt-1"
+    />
+    {errors.ownerName && (
+      <p className="text-red-500 text-sm">{errors.ownerName.message}</p>
+    )}
+  </div>
+
+  {/* Contact Number */}
+  <div className="flex-1">
+    <input
+      type="text"
+      placeholder="Contact Number"
+      {...register("contactNumber")}
+      className="border px-4 py-2 rounded w-full mt-1"
+    />
+    {errors.contactNumber && (
+      <p className="text-red-500 text-sm">{errors.contactNumber.message}</p>
+    )}
+  </div>
+
+  {/* Email */}
+  <div className="flex-1">
+    <input
+      type="email"
+      placeholder="Email"
+      {...register("email")}
+      className="border px-4 py-2 rounded w-full mt-1"
+    />
+    {errors.email && (
+      <p className="text-red-500 text-sm">{errors.email.message}</p>
+    )}
+  </div>
+
+</div>
+   
+         
         {/* Submit Button */}
-        <div className="flex justify-end mt-4">
+       
           <button
             type="submit"
-            className="px-6 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+            className="mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Add Apartment
           </button>
-        </div>
+     
       </form>
     </div>
   );
