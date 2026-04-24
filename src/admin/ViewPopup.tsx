@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState } from "react";
+import type { ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { updateApartment, deleteApartment } from "../slice/apartmentSlice";
 import type { Apartment } from "../type/Apartment";
@@ -94,7 +95,7 @@ const handleDelete = async () => {
 
         {/* Left: Image */}
         {mainImageUrl && (
-          <div className="flex-shrink-0 w-full md:w-1/3 rounded-lg overflow-hidden shadow-sm">
+          <div className="shrink-0 w-full md:w-1/3 rounded-lg overflow-hidden shadow-sm">
             <img
               src={mainImageUrl}
               alt={formData.title}
@@ -180,7 +181,7 @@ const handleDelete = async () => {
   );
 };
 
-const Info = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
+const Info = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="flex flex-col">
     <span className="font-semibold text-gray-700 capitalize text-sm">{label}</span>
     <span className="text-gray-600 text-sm">{value}</span>

@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import type { RootState } from "../store/store";
 import type { Apartment } from "../type/Apartment";
 import { fetchApartments } from "../slice/apartmentSlice";
+import type { AppDispatch } from "../store/store";
 
 interface OutletContextType {
   setSelectedApartment: React.Dispatch<
@@ -12,7 +13,7 @@ interface OutletContextType {
 }
 
 const AdminApartmentList: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const { apartments, loading } = useSelector(
     (state: RootState) => state.apartment
@@ -23,7 +24,7 @@ const AdminApartmentList: React.FC = () => {
 
   /*Fetch Data*/
   useEffect(() => {
-    dispatch(fetchApartments() as any);
+    dispatch(fetchApartments() );
   }, [dispatch]);
 
   /*Loading*/

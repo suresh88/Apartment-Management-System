@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback,useState, useEffect } from "react";
 import ApartmentCard from "./ApartmentCard";
 import ApartmentModal from "./ApartmentModal";
 import type { Apartment } from "../type/Apartment";
@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { useNavigate } from "react-router-dom";
 
-const Apartment = () => {
+const ApartmentPage = () => {
  const navigate = useNavigate();
 
   const [apartments, setApartments] = useState <Apartment[]>([]);
@@ -29,7 +29,7 @@ const currentUser = useSelector(
   (state: RootState) => state.auth.currentUser
 );
  
-  const fetchApartments = async () => {
+  const fetchApartments =useCallback( async () => {
     try {
       setLoading(true);
 
@@ -54,7 +54,7 @@ if (maxPrice) params.append("maxPrice", maxPrice);
     } finally {
       setLoading(false);
     }
-  };
+  }, [city, area, minPrice, maxPrice, page]); 
 
   // Filters  Page change → API call
 useEffect(() => {
@@ -63,7 +63,7 @@ useEffect(() => {
   }, 400);
 
   return () => clearTimeout(timer);
-}, [city, area, minPrice, maxPrice, page]);
+}, [fetchApartments]);
 
 
   return (
@@ -176,4 +176,4 @@ useEffect(() => {
   );
 };
 
-export default Apartment;
+export default ApartmentPage;

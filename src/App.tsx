@@ -11,12 +11,15 @@ import CreateApartment from "./admin/CreateApartment";
 import Login from "./components/Login";
 import UserPage from "./components/UserPage";
 import AdminApartmentList from "./admin/AdminApartmentList";
-import Apartment from "./components/Apartment";
+
 import About from "./components/About";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { API } from "./services/api"
 import { login, logout } from "./slice/authSlice"
+import ApartmentPage from "./components/ApartmentPage";
+
+
 
 function App() {
    const dispatch = useDispatch();
@@ -46,7 +49,7 @@ function App() {
         <Route path="/footer" element={<Footer />} />
         <Route path="/login" element={<Login/>} />
         <Route path="/userpage" element={<UserPage/>} />
-        <Route path="/apartment" element={<Apartment/>} />
+        <Route path="/apartment" element={<ApartmentPage/>} />
         <Route path="/about" element={<About/>}/>
         <Route path="/admin" element={<AdminPage />}>
            <Route index element={<div className="p-4">Select an option</div>} />

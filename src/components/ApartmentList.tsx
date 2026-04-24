@@ -8,13 +8,14 @@ import type { Apartment } from "../type/Apartment";
 import { useDispatch } from "react-redux";
 import { fetchApartments } from "../slice/apartmentSlice";
 import type { User } from "../type/User";
+import type { AppDispatch } from "../store/store";
 
 interface ApartmentListProps {
   limit?: number;
 }
 
 const ApartmentList: React.FC<ApartmentListProps> = ({ limit }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   //fatch apartment details
   useEffect(() => {
     dispatch(fetchApartments());

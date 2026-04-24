@@ -1,8 +1,4 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  type PayloadAction,
-} from "@reduxjs/toolkit";
+import {  createSlice,  createAsyncThunk,  type PayloadAction,} from "@reduxjs/toolkit";
 import { API } from "../services/api";
 import type { Apartment } from "../type/Apartment";
 

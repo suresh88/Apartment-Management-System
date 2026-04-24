@@ -6,23 +6,24 @@ import { z } from "zod";
 import {API} from "../services/api"
 import { useDispatch } from "react-redux";
 import { addApartment } from "../slice/apartmentSlice";
+
 // ------------------ ZOD SCHEMA ------------------
 const apartmentSchema = z.object({
   title: z.string().min(2),
 
-  price: z.coerce.number().min(1, "Price is required"),
+  price: z.number().min(1, "Price is required"),
 
   city: z.string().min(2),
   area: z.string().min(2),
 
-  noOfFlats: z.coerce.number().optional(),
+   noOfFlats: z.number().optional(),
   description: z.string().optional(),
 
   ownerName: z.string().min(2),
   contactNumber: z.string().min(10),
   email: z.string().email(),
 
-  image: z.any().refine((file) => file?.length > 0),
+  image: z.any().refine((files) => files?.length > 0, "Image is required"),
 });
 
 type ApartmentForm = z.infer<typeof apartmentSchema>;
@@ -103,9 +104,9 @@ const dispatch = useDispatch();
         {/* Price */}
         <div>
        <input
-  type="text"
+  type="number"
   placeholder="Price"
-  {...register("price")}
+  {...register("price",{ valueAsNumber: true })}
   className="border px-4 py-2 rounded w-full mt-1"
 />
          {errors.price && (
@@ -142,7 +143,7 @@ const dispatch = useDispatch();
         <input
           type="number"
           placeholder="No of Flats"
-          {...register("noOfFlats")}
+          {...register("noOfFlats", { valueAsNumber: true })}
           className="border px-4 py-2 rounded w-full mt-1"
         />
           {errors.noOfFlats && (
@@ -154,7 +155,7 @@ const dispatch = useDispatch();
           <label className="font-medium">Main Image:</label>
           <input type="file" {...register("image")}  className="mt-2"/>
           {errors.image && (
-            <p className="text-red-500 text-sm">{errors.image?.message}</p>
+            <p className="text-red-500 text-sm">{typeof errors.image?.message === "string" ? errors.image.message : ""}</p>
           )}
         </div> 
 

@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
         />
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 bg-white text-black shadow-md rounded-lg p-2 w-[140px] z-50">
+          <div className="absolute right-0 mt-2 bg-white text-black shadow-md rounded-lg p-2  w-35 z-50">
             <NavLink
               to="/userpage"
               className="block px-3 py-2 rounded hover:bg-gray-100"

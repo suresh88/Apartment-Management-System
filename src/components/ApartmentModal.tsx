@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useMemo, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addBooking } from "../slice/bookingSlice";
 import type { Apartment } from "../type/Apartment";
@@ -25,36 +25,37 @@ const ApartmentModal: React.FC<ApartmentModalProps> = ({ apartment, onClose }) =
     city: "",
     town: "",
   });
-
-  // Image state
-  const [imageUrl, setImageUrl] = useState("");
-
-  useEffect(() => {
-    if (!apartment.image) return;
-
-    // File upload
-    if (apartment.image instanceof File) {
-      const url = URL.createObjectURL(apartment.image);
-      setImageUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-
-    // Backend image (string)
-    if (typeof apartment.image === "string") {
-      setImageUrl(
-        apartment.image.replace(
-          "http://localhost:5000",
-          "https://retinal-lark-phony.ngrok-free.dev"
-        )
-      );
-    }
-  }, [apartment.image]);
-
   const dispatch = useDispatch();
 
   const currentUser = useSelector(
     (state: RootState) => state.auth.currentUser as User | null
   );
+  
+  const imageUrl = useMemo(() => {
+    if (!apartment.image) return "";
+
+    if (apartment.image instanceof File) {
+      return URL.createObjectURL(apartment.image);
+    }
+
+    if (typeof apartment.image === "string") {
+      return apartment.image.replace(
+        "http://localhost:5000",
+        "https://retinal-lark-phony.ngrok-free.dev"
+      );
+    }
+
+    return "";
+  }, [apartment.image]);
+
+  // cleanup blob URL (only for File)
+  useEffect(() => {
+    return () => {
+      if (apartment.image instanceof File && imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl, apartment.image]);
 
   const handleBooking = () => {
     if (!userDetails.mobile || !userDetails.city || !userDetails.town) {

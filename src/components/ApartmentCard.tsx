@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo,useEffect } from "react";
 import type { Apartment } from "../type/Apartment";
 
 interface ApartmentCardProps {
@@ -8,33 +8,37 @@ interface ApartmentCardProps {
 
 const ApartmentCard: React.FC<ApartmentCardProps> = ({ apartment, onView }) => {
   //image preview
-  const [preview, setPreview] = useState("");
-// 2 type image upload 
-  useEffect(() => {
-    if (!apartment.image) return;
+ 
+  const preview = useMemo(() => {
+    if (!apartment.image) return "";
 
-    // File (local upload)
     if (apartment.image instanceof File) {
-      const url = URL.createObjectURL(apartment.image);
-      setPreview(url);
-      return () => URL.revokeObjectURL(url);
+      return URL.createObjectURL(apartment.image);
     }
-
 
     if (typeof apartment.image === "string") {
-      setPreview(
-        apartment.image.replace(
-          "http://localhost:5000",
-          "https://retinal-lark-phony.ngrok-free.dev"
-        )
+      return apartment.image.replace(
+        "http://localhost:5000",
+        "https://retinal-lark-phony.ngrok-free.dev"
       );
     }
+
+    return "";
   }, [apartment.image]);
 
-  //card show city and area same line
+  // 
+  useEffect(() => {
+    return () => {
+      if (apartment.image instanceof File && preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview, apartment.image]);
 
-  const fullLocation = [apartment.city, apartment.area].filter(Boolean).join(", ");
-
+  // Location
+  const fullLocation = [apartment.city, apartment.area]
+    .filter(Boolean)
+    .join(", ");
   return (
     <div className="bg-white border rounded-lg overflow-hidden w-full max-w-xs mx-auto shadow-md">
       

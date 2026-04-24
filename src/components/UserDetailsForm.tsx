@@ -55,7 +55,7 @@ const UserDetailsForm: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center  z-60">
       <div className="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-2/5 relative">
         <button
           onClick={onClose}
